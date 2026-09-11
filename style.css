@@ -1,0 +1,628 @@
+/* ============================================================
+   Local Bazar — Main Stylesheet
+   Theme: Black / Gray / White (monochrome, professional)
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Hind:wght@400;500;600;700&display=swap');
+
+:root {
+  /* ---- Color tokens ---- */
+  --lb-black:        #0a0a0a;
+  --lb-gray-900:      #1a1a1a;
+  --lb-gray-700:      #3d3d3d;
+  --lb-gray-500:      #6f6f6f;
+  --lb-gray-300:      #a8a8a8;
+  --lb-gray-100:      #e9e9e9;
+  --lb-gray-50:       #f5f5f4;
+  --lb-white:         #ffffff;
+
+  /* ---- Hero slider height (fixed = predictable image crop, like NexMith slider) ---- */
+  --lb-hero-h-desktop: 560px;
+  --lb-hero-h-mobile:  380px;
+
+  --lb-bg:            var(--lb-white);
+  --lb-surface:       var(--lb-white);
+  --lb-surface-alt:   var(--lb-gray-50);
+  --lb-text:          var(--lb-black);
+  --lb-text-muted:    var(--lb-gray-500);
+  --lb-border:        var(--lb-gray-100);
+  --lb-border-strong: var(--lb-gray-700);
+
+  /* ---- Layout ---- */
+  --lb-container-w:   1180px;
+  --lb-radius-sm:     6px;
+  --lb-radius-md:     10px;
+  --lb-radius-lg:     16px;
+  --lb-gap:           20px;
+
+  /* ---- Type ---- */
+  --lb-font: 'Hind', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* ---- Motion ---- */
+  --lb-ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================================
+   Reset & base
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--lb-font);
+  background: var(--lb-bg);
+  color: var(--lb-text);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, p { margin: 0; }
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img { max-width: 100%; display: block; }
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+ul, ol { margin: 0; padding: 0; list-style: none; }
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+:focus-visible {
+  outline: 2px solid var(--lb-black);
+  outline-offset: 2px;
+}
+
+.lb-container {
+  max-width: var(--lb-container-w);
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+main > section {
+  padding: 48px 0;
+  border-bottom: 1px solid var(--lb-border);
+}
+
+main > section:last-of-type { border-bottom: none; }
+
+/* ============================================================
+   Section heads
+   ============================================================ */
+.lb-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.lb-section-head--with-search {
+  flex-wrap: wrap;
+}
+
+.lb-section-head h2 {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.lb-view-all {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--lb-text-muted);
+  white-space: nowrap;
+  transition: color 0.15s var(--lb-ease);
+}
+
+.lb-view-all:hover { color: var(--lb-black); }
+
+/* ============================================================
+   Hero / Search
+   ============================================================ */
+.lb-hero {
+  position: relative;
+  overflow: hidden;
+  background: var(--lb-black);
+  color: var(--lb-white);
+  min-height: var(--lb-hero-h-desktop);
+  display: flex;
+  align-items: center;
+  padding: 48px 0;
+  border-bottom: none;
+}
+
+@media (max-width: 600px) {
+  .lb-hero {
+    /* Height now tracks the image's real 16:9 ratio (56.25vw) instead of a
+       fixed tall box — this is what was forcing heavy left/right cropping.
+       min() keeps a sensible floor so content never gets too squeezed. */
+    min-height: min(var(--lb-hero-h-mobile), 58vw);
+    padding: 24px 0;
+  }
+
+  .lb-hero h1 {
+    font-size: 22px;
+    max-width: 20ch;
+  }
+
+  .lb-hero > .lb-container > p {
+    font-size: 13px;
+    margin-bottom: 18px;
+  }
+
+  .lb-search {
+    padding: 4px;
+  }
+
+  .lb-search input {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+
+  .lb-search button {
+    padding: 10px 18px;
+    font-size: 14px;
+  }
+}
+
+/* Background image slider — crossfades between slides, JS just toggles .is-active */
+.lb-hero__slider {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.lb-hero__slide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 35%; /* keeps upper-middle of photo in frame on narrow crops */
+  opacity: 0;
+  transition: opacity 1.4s var(--lb-ease);
+}
+
+.lb-hero__slide.is-active {
+  opacity: 1;
+}
+
+/* If a slide fails to load, never leave a broken-image icon on screen */
+.lb-hero__slide.lb-hero__slide--broken {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .lb-hero__slide {
+    object-position: center 25%; /* mobile crops taller/narrower, bias toward top */
+  }
+}
+
+/* Dark overlay so white text stays readable over any photo */
+.lb-hero__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(10,10,10,0.55) 0%, rgba(10,10,10,0.8) 100%);
+}
+
+.lb-hero > .lb-container {
+  position: relative;
+  z-index: 2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lb-hero__slide { transition: none; }
+}
+
+.lb-hero h1 {
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  max-width: 16ch;
+  margin-bottom: 12px;
+}
+
+.lb-hero > .lb-container > p {
+  font-size: 16px;
+  color: var(--lb-gray-300);
+  max-width: 42ch;
+  margin-bottom: 24px;
+}
+
+.lb-search {
+  display: flex;
+  align-items: center;
+  max-width: 400px;
+  width: 100%;
+  background: var(--lb-surface);
+  border: 1px solid var(--lb-border);
+  border-radius: var(--lb-radius-md);
+  padding: 4px;
+  gap: 6px;
+}
+
+.lb-hero__location {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lb-text-muted);
+  padding: 8px 12px;
+  border-right: 1px solid var(--lb-border);
+  white-space: nowrap;
+}
+
+.lb-search input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--lb-black);
+  min-width: 0;
+}
+
+.lb-search input:focus { outline: none; }
+
+.lb-search input::placeholder { color: var(--lb-gray-500); }
+
+.lb-search button {
+  border: none;
+  background: var(--lb-black);
+  color: var(--lb-white);
+  font-weight: 600;
+  font-size: 14px;
+  padding: 10px 20px;
+  border-radius: var(--lb-radius-sm);
+  transition: background 0.15s var(--lb-ease);
+}
+
+.lb-search button:hover { background: var(--lb-gray-700); }
+
+.lb-search-status {
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--lb-gray-300);
+  min-height: 18px;
+}
+
+/* ============================================================
+   Categories
+   ============================================================ */
+.lb-categories {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+
+.lb-categories::-webkit-scrollbar { display: none; }
+
+.lb-category {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px;
+  border: 1px solid var(--lb-border);
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--lb-text);
+  background: var(--lb-surface);
+  transition: border-color 0.15s var(--lb-ease), background 0.15s var(--lb-ease);
+}
+
+.lb-category:hover {
+  border-color: var(--lb-border-strong);
+  background: var(--lb-surface-alt);
+}
+
+.lb-category__icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* ============================================================
+   Grid states (loading / empty / error)
+   ============================================================ */
+.lb-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--lb-gap);
+}
+
+.lb-state {
+  grid-column: 1 / -1;
+  padding: 40px 20px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--lb-text-muted);
+  background: var(--lb-surface-alt);
+  border: 1px dashed var(--lb-border);
+  border-radius: var(--lb-radius-md);
+}
+
+.lb-state--error {
+  color: var(--lb-black);
+  border-color: var(--lb-border-strong);
+  background: var(--lb-gray-50);
+}
+
+/* ============================================================
+   Listing cards (.lb-card)
+   ============================================================ */
+.lb-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--lb-surface);
+  border: 1px solid var(--lb-border);
+  border-radius: var(--lb-radius-md);
+  overflow: hidden;
+  transition: border-color 0.15s var(--lb-ease), transform 0.15s var(--lb-ease);
+}
+
+.lb-card:hover {
+  border-color: var(--lb-border-strong);
+  transform: translateY(-2px);
+}
+
+.lb-card__media {
+  aspect-ratio: 4 / 3;
+  background: var(--lb-gray-50);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: var(--lb-gray-300);
+  overflow: hidden;
+}
+
+.lb-card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lb-card__body {
+  padding: 14px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lb-card__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--lb-black);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lb-card__price {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--lb-black);
+}
+
+.lb-card__meta {
+  font-size: 13px;
+  color: var(--lb-text-muted);
+}
+
+/* ============================================================
+   Business / Service cards (.lb-biz-card)
+   ============================================================ */
+.lb-biz-card {
+  display: flex;
+  gap: 14px;
+  padding: 16px;
+  background: var(--lb-surface);
+  border: 1px solid var(--lb-border);
+  border-radius: var(--lb-radius-md);
+  transition: border-color 0.15s var(--lb-ease);
+}
+
+.lb-biz-card:hover { border-color: var(--lb-border-strong); }
+
+.lb-biz-card__logo {
+  flex: 0 0 56px;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--lb-radius-sm);
+  background: var(--lb-gray-50);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  overflow: hidden;
+}
+
+.lb-biz-card__logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lb-biz-card__name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--lb-black);
+  margin-bottom: 2px;
+}
+
+.lb-biz-card__meta {
+  font-size: 13px;
+  color: var(--lb-text-muted);
+  margin-bottom: 4px;
+}
+
+.lb-biz-card__desc {
+  font-size: 13px;
+  color: var(--lb-gray-700);
+  line-height: 1.5;
+}
+
+/* ============================================================
+   Buttons
+   ============================================================ */
+.lb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 13px 26px;
+  background: var(--lb-black);
+  color: var(--lb-white);
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: var(--lb-radius-sm);
+  transition: background 0.15s var(--lb-ease), transform 0.15s var(--lb-ease);
+}
+
+.lb-btn:hover {
+  background: var(--lb-gray-700);
+  transform: translateY(-1px);
+}
+
+/* ============================================================
+   Promotion band
+   ============================================================ */
+.lb-promo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  background: var(--lb-surface-alt);
+  border: 1px solid var(--lb-border);
+  border-radius: var(--lb-radius-lg);
+  padding: 36px;
+}
+
+.lb-promo h2 {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.lb-promo p {
+  font-size: 14px;
+  color: var(--lb-text-muted);
+  max-width: 46ch;
+}
+
+.lb-promo .lb-btn {
+  flex-shrink: 0;
+  background: var(--lb-black);
+}
+
+/* ============================================================
+   Sell / Post Ad CTA
+   ============================================================ */
+.lb-sell-cta {
+  text-align: center;
+  padding: 48px 24px;
+  background: var(--lb-black);
+  border-radius: var(--lb-radius-lg);
+}
+
+.lb-sell-cta h2 {
+  color: var(--lb-white);
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.lb-sell-cta p {
+  color: var(--lb-gray-300);
+  font-size: 15px;
+  margin-bottom: 24px;
+}
+
+.lb-sell-cta .lb-btn {
+  background: var(--lb-white);
+  color: var(--lb-black);
+}
+
+.lb-sell-cta .lb-btn:hover {
+  background: var(--lb-gray-100);
+}
+
+/* ============================================================
+   Trust message
+   ============================================================ */
+.lb-trust {
+  text-align: center;
+  font-size: 14px;
+  color: var(--lb-text-muted);
+  max-width: 60ch;
+  margin: 0 auto;
+}
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+@media (max-width: 960px) {
+  .lb-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 720px) {
+  .lb-grid { grid-template-columns: repeat(2, 1fr); }
+  .lb-search { flex-direction: column; }
+  .lb-search button { width: 100%; }
+  .lb-hero__location {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--lb-border);
+    justify-content: flex-start;
+  }
+  .lb-section-head--with-search {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .lb-section-head--with-search .lb-search {
+    max-width: 100%;
+  }
+  .lb-promo { flex-direction: column; align-items: flex-start; }
+  .lb-promo .lb-btn { width: 100%; text-align: center; }
+}
+
+@media (max-width: 480px) {
+  .lb-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .lb-container { padding: 0 16px; }
+  main > section { padding: 36px 0; }
+  .lb-biz-card { flex-direction: column; }
+  .lb-biz-card__logo { width: 44px; height: 44px; font-size: 18px; }
+}
+
+/* ============================================================
+   Reduced motion
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.001ms !important;
+    animation-duration: 0.001ms !important;
+  }
+}
